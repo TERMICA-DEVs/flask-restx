@@ -4,7 +4,6 @@
     <title>{{ title }}</title>
     {% include 'swagger-ui-css.html' %}
 
-    <link rel="icon" type="image/png" href="{{ swagger_static('favicon-32x32.png') }}" sizes="32x32" />
     <link rel="icon" type="image/png" href="{{ swagger_static('favicon-16x16.png') }}" sizes="16x16" />
 
 </head>
@@ -68,7 +67,11 @@
                 {%- endif %}
                 displayOperationId: {{ config.SWAGGER_UI_OPERATION_ID|default(False)|tojson }},
                 displayRequestDuration: {{ config.SWAGGER_UI_REQUEST_DURATION|default(False)|tojson }},
-                docExpansion: "{{ config.SWAGGER_UI_DOC_EXPANSION | default('none') }}"
+                docExpansion: "{{ config.SWAGGER_UI_DOC_EXPANSION | default('none') }}",
+                requestInterceptor: (req) => {
+                    req.headers.Authorization = "Bearer " + req.headers.Authorization;
+                    return req;
+                }
             })
 
             {% if config.SWAGGER_UI_OAUTH_CLIENT_ID -%}

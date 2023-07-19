@@ -12,7 +12,7 @@ from flask import current_app
 from . import fields
 from .model import Model, ModelBase, OrderedModel
 from .reqparse import RequestParser
-from .utils import merge, not_none, not_none_sorted
+from .utils import merge, not_none
 from ._http import HTTPStatus
 
 from urllib.parse import quote
@@ -57,6 +57,8 @@ RE_PARSE_RULE = re.compile(
     """,
     re.VERBOSE,
 )
+
+METHODS_ORDER = ('get', 'post', 'put', 'patch', 'delete', 'connect', 'head', 'options', 'trace')
 
 
 def ref(model):
@@ -294,7 +296,7 @@ class Swagger(object):
         specs = {
             "swagger": "2.0",
             "basePath": basepath,
-            "paths": not_none_sorted(paths),
+            "paths": not_none(paths),
             "info": infos,
             "produces": list(self.api.representations.keys()),
             "consumes": ["application/json"],
@@ -475,7 +477,8 @@ class Swagger(object):
         if doc is False:
             return
         path = {"parameters": self.parameters_for(doc) or None}
-        for method in [m.lower() for m in resource.methods or []]:
+        methods = [m.lower() for m in resource.methods or []]
+        for method in [m for m in METHODS_ORDER if m in methods]:
             methods = [m.lower() for m in kwargs.get("methods", [])]
             if doc[method] is False or methods and method not in methods:
                 continue
